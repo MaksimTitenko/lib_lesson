@@ -1,7 +1,10 @@
 import uuid
+from datetime import date
 
+from django.contrib.auth.models import User
 from django.db import models
 from django.urls import reverse
+from django.utils import timezone
 
 
 class Genre(models.Model):
@@ -27,6 +30,7 @@ class Book(models.Model):
     def get_absolute_url(self):
         return reverse('book-detail', args=[str(self.id)])
 
+
 class Author(models.Model):
     first_name = models.CharField(max_length=100, verbose_name='Имя')
     last_name = models.CharField(max_length=100, verbose_name='Фамилия')
@@ -36,12 +40,13 @@ class Author(models.Model):
     def __str__(self):
         return f'{self.first_name} {self.last_name}'
 
+
 class BookInstance(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
     book = models.ForeignKey(Book, on_delete=models.SET_NULL, null=True)
     imprint = models.CharField(max_length=200)
     due_back = models.DateField(null=True, blank=True)
-
+    borrower = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     LOAN_STATUS = (('m', 'Maintenance'),
                    ('o', 'On load'),
                    ('a', 'Available'),
@@ -50,3 +55,8 @@ class BookInstance(models.Model):
 
     class Meta:
         ordering = ['due_back']
+
+    def is_overdue(self):
+        if self.due_back and date.today() > self.due_back:
+            return True
+        return False
