@@ -1,0 +1,39 @@
+version: "3.5"
+
+services:
+  postgres:
+    image: postgres
+    container_name: lib_postgres
+    networks:
+      lib_network:
+        ipv4_address: "173.12.0.2"
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: "trust"
+
+
+  web:
+    build: .
+    tty: true
+    container_name: lib_web
+    restart: always
+    command: bash -c "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8001"
+    volumes:
+    - .:/code
+    depends_on:
+      - postgres
+    ports:
+      - 8001:8001
+    env_file:
+      - .secret.env
+    networks:
+      lib_network:
+        ipv4_address: "173.12.0.3"
+
+
+
+networks:
+  lib_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: "173.12.0.0/16"
