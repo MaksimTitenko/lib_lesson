@@ -1,0 +1,6 @@
+FROM python:3.8.3
+ENV PYTHONNUNBUFFERED 1
+RUN mkdir /code
+WORKDIR /code
+COPY req_stage.txt /code/
+RUN pip install -r req_stage.txt

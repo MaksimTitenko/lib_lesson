@@ -1,0 +1,55 @@
+version: "3.5"
+
+services:
+  nginx:
+    image: nginx:latest
+    container_name: lib_nginx
+    ports:
+      - 80:80
+    volumes:
+    - ./static/:/code/static
+    - ./nginx/:/etc/nginx/conf.d
+    - ./media/:/code/media
+    depends_on:
+      - web
+    networks:
+      lib_network:
+        ipv4_address: "173.12.0.4"
+
+
+  postgres:
+    image: postgres
+    container_name: lib_postgres
+    networks:
+      lib_network:
+        ipv4_address: "173.12.0.2"
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: "trust"
+
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile-stage
+    tty: true
+    container_name: lib_web
+    restart: always
+    command: bash -c "python manage.py makemigrations && python manage.py migrate && python manage.py collectstatic --noinput & gunicorn --workers=9 -c gunicorn.py lib_lesson.wsgi --timeout 600"
+    volumes:
+    - .:/code
+    depends_on:
+      - postgres
+    env_file:
+      - .secret.env
+    networks:
+      lib_network:
+        ipv4_address: "173.12.0.3"
+
+
+
+networks:
+  lib_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: "173.12.0.0/16"
