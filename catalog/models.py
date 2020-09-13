@@ -20,6 +20,7 @@ class Book(models.Model):
     summary = models.TextField(help_text='Описание книги')
     isbn = models.CharField('ISBN', max_length=13)
     genre = models.ManyToManyField(Genre, help_text='Выберите жанр для этой книги')
+    image = models.ImageField(null=True, blank=True)
 
     def __str__(self):
         return self.title
@@ -29,6 +30,9 @@ class Book(models.Model):
 
     def get_absolute_url(self):
         return reverse('book-detail', args=[str(self.id)])
+
+    class Meta:
+        ordering = ['-id']
 
 
 class Author(models.Model):
