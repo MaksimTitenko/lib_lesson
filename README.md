@@ -7,5 +7,6 @@
 1. `docker-compose build`
 1. `docker-compose up`
 ## Запуск в прод окружении
+1. В settings.py установить DEBUG=False
 1. `docker-compose -f docker-compose.stage.yml build`
 1. `docker-compose -f docker-compose.stage.yml up`
